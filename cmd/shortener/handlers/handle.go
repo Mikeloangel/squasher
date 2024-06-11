@@ -33,7 +33,7 @@ func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shortened := h.Storage.Set(string(body))
-	host := fmt.Sprintf("%s://%s:%s/", config.SERVER_PROTOCOL, config.SERVER_NAME, config.SERVER_PORT)
+	host := fmt.Sprintf("%s://%s:%s/", config.ServerProtocol, config.ServerName, config.ServerPort)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(host + shortened))

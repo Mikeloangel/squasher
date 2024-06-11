@@ -22,7 +22,7 @@ func main() {
 
 	mux.HandleFunc("/", handler.Handle)
 
-	dsn := fmt.Sprintf("%s:%s", config.SERVER_NAME, config.SERVER_PORT)
+	dsn := fmt.Sprintf("%s:%s", config.ServerName, config.ServerPort)
 	err := http.ListenAndServe(dsn, mux)
 
 	if err != nil {
