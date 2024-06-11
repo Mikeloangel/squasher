@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
+	"github.com/Mikeloangel/squasher/internal/config"
 )
 
 type Handler struct {
@@ -13,8 +15,6 @@ type Handler struct {
 }
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
-	// log.Printf("Method: %s, URL: %s, Header: %v", r.Method, r.URL.Path, r.Header)
-
 	switch r.Method {
 	case http.MethodGet:
 		h.Get(w, r)
@@ -33,15 +33,15 @@ func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shortened := h.Storage.Set(string(body))
+	host := fmt.Sprintf("%s://%s:%s/", config.SERVER_PROTOCOL, config.SERVER_NAME, config.SERVER_PORT)
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("localhost:8080/" + shortened))
+	w.Write([]byte(host + shortened))
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	shortUrl := strings.TrimPrefix(r.URL.Path, "/")
-
-	url, err := h.Storage.Get(shortUrl)
+	shortURL := strings.TrimPrefix(r.URL.Path, "/")
+	url, err := h.Storage.Get(shortURL)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
+	"github.com/Mikeloangel/squasher/internal/config"
 )
 
 var links *storage.Storage
@@ -19,9 +21,9 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", handler.Handle)
-	// mux.Handle("/", middlewares.TextPlain(http.HandlerFunc(handler.Handle)))
 
-	err := http.ListenAndServe(":8080", mux)
+	dsn := fmt.Sprintf("%s:%s", config.SERVER_NAME, config.SERVER_PORT)
+	err := http.ListenAndServe(dsn, mux)
 
 	if err != nil {
 		panic(err)
