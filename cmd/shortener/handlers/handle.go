@@ -8,27 +8,22 @@ import (
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 	"github.com/Mikeloangel/squasher/internal/config"
+	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
 	Storage *storage.Storage
 }
 
-func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		h.Get(w, r)
-	case http.MethodPost:
-		h.Post(w, r)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
 func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Body error", http.StatusBadRequest)
+		return
+	}
+
+	if len(strings.TrimSpace(string(body))) == 0 {
+		http.Error(w, "empty body", http.StatusBadRequest)
 		return
 	}
 
@@ -40,8 +35,8 @@ func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	shortURL := strings.TrimPrefix(r.URL.Path, "/")
-	url, err := h.Storage.Get(shortURL)
+	t := chi.URLParam(r, "id")
+	url, err := h.Storage.Get(t)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

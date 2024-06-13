@@ -8,57 +8,91 @@ import (
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPost(t *testing.T) {
 	links := storage.NewStorage()
-
 	h := &handlers.Handler{
 		Storage: links,
 	}
 
-	body := strings.NewReader("http://www.ya.ru/")
-	rPost, err := http.NewRequest("POST", "/", body)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name       string
+		body       string
+		wantStatus int
+		wantBody   string
+	}{
+		{
+			name:       "Valid URL",
+			body:       "http://www.ya.ru/",
+			wantStatus: http.StatusCreated,
+			wantBody:   "http://localhost:8080/6f782b56",
+		},
+		{
+			name:       "Invalid URL",
+			body:       "",
+			wantStatus: http.StatusBadRequest,
+			wantBody:   "empty body\n",
+		},
 	}
 
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.Post)
-	handler.ServeHTTP(w, rPost)
+	router := Router(h)
 
-	if status := w.Code; status != http.StatusCreated {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
-	}
-	wantBody := "http://localhost:8080/6f782b56"
-	if body := w.Body.String(); body != wantBody {
-		t.Errorf("handler returned wrong body: got %s want %s", body, wantBody)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest("POST", "/", strings.NewReader(tt.body))
+			assert.NoError(t, err)
+
+			rr := httptest.NewRecorder()
+			router.ServeHTTP(rr, req)
+
+			assert.Equal(t, tt.wantStatus, rr.Code, "handler вернул неверный статус код")
+			assert.Equal(t, tt.wantBody, rr.Body.String(), "handler вернул неверное тело")
+		})
 	}
 }
 
 func TestGet(t *testing.T) {
 	links := storage.NewStorage()
-
 	h := &handlers.Handler{
 		Storage: links,
 	}
 
 	h.Storage.Set("http://www.ya.ru/")
 
-	rPost, err := http.NewRequest("GET", "/6f782b56", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name         string
+		url          string
+		wantStatus   int
+		wantLocation string
+	}{
+		{
+			name:         "Valid ID",
+			url:          "/6f782b56",
+			wantStatus:   http.StatusTemporaryRedirect,
+			wantLocation: "http://www.ya.ru/",
+		},
+		{
+			name:         "Invalid ID",
+			url:          "/123",
+			wantStatus:   http.StatusNotFound,
+			wantLocation: "",
+		},
 	}
 
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.Get)
-	handler.ServeHTTP(w, rPost)
+	router := Router(h)
 
-	if status := w.Code; status != http.StatusTemporaryRedirect {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
-	}
-	wantLocation := "http://www.ya.ru/"
-	if location := w.Header().Get("Location"); location != wantLocation {
-		t.Errorf("handler returned wrong location: got %s want %s", location, wantLocation)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest("GET", tt.url, nil)
+			assert.NoError(t, err)
+
+			rr := httptest.NewRecorder()
+			router.ServeHTTP(rr, req)
+
+			assert.Equal(t, tt.wantStatus, rr.Code, "handler вернул неверный код ответа")
+			assert.Equal(t, tt.wantLocation, rr.Header().Get("Location"), "handler неверный локейшен")
+		})
 	}
 }
