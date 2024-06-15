@@ -39,8 +39,8 @@ func parseEnviroment() {
 	flag.Func("a", "Sets server location and port in format host:port", conf.SetServerFromString)
 	flag.Parse()
 
-	if baseUrl := os.Getenv("BASE_URL"); baseUrl != "" {
-		conf.HostLocation = baseUrl
+	if baseURL := os.Getenv("BASE_URL"); baseURL != "" {
+		conf.HostLocation = baseURL
 	}
 
 	if serverAddr := os.Getenv("SERVER_ADDRESS"); serverAddr != "" {
