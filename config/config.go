@@ -13,11 +13,11 @@ type Config struct {
 	HostLocation   string
 }
 
-func NewConfig() *Config {
+func NewConfig(serverLocation string, serverPort int, hostLocation string) *Config {
 	return &Config{
-		ServerLocation: "localhost",
-		ServerPort:     8080,
-		HostLocation:   "http://localhost:8080",
+		ServerLocation: serverLocation,
+		ServerPort:     serverPort,
+		HostLocation:   hostLocation,
 	}
 }
 
@@ -29,7 +29,7 @@ func (c Config) GetHostLocation() string {
 	return fmt.Sprintf("%s/", c.HostLocation)
 }
 
-func (c *Config) SetServerFromString(s string) error {
+func (c *Config) ParseServerConfig(s string) error {
 	var err error
 
 	host := strings.Split(s, ":")

@@ -17,8 +17,12 @@ func NewStorage() *Storage {
 }
 
 func (s *Storage) Set(url string) string {
-	short := s.shortenify(url)
-	s.data[short] = url
+	short := s.generateShortURL(url)
+	_, ok := s.data[short]
+	if !ok {
+		s.data[short] = url
+	}
+
 	return short
 }
 
@@ -31,7 +35,7 @@ func (s *Storage) Get(short string) (string, error) {
 	return value, nil
 }
 
-func (s *Storage) shortenify(url string) string {
+func (s *Storage) generateShortURL(url string) string {
 	hasher := fnv.New32a()
 	hasher.Write([]byte(url))
 	return fmt.Sprintf("%x", hasher.Sum32())

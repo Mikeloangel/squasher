@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,23 +19,26 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	long, err := reader.ReadString('\n')
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return
 	}
 
-	long = strings.TrimSuffix(long, "\n")
+	long = strings.TrimSpace(long)
 	data.Set("url", long)
 
 	client := &http.Client{}
 
 	request, err := http.NewRequest(http.MethodPost, endpoint, strings.NewReader(data.Encode()))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return
 	}
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	response, err := client.Do(request)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return
 	}
 
 	fmt.Println("Status code: ", response.StatusCode)
@@ -42,7 +46,8 @@ func main() {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return
 	}
 
 	fmt.Println(string(body))

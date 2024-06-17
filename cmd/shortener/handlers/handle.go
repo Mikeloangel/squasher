@@ -5,17 +5,21 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
-	"github.com/Mikeloangel/squasher/config"
+	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
-	Storage *storage.Storage
-	Config  *config.Config
+	state.State
 }
 
-func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
+func NewHandler(appState state.State) *Handler {
+	return &Handler{
+		State: appState,
+	}
+}
+
+func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Body error", http.StatusBadRequest)
@@ -27,15 +31,15 @@ func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortened := h.Storage.Set(string(body))
+	shortened := h.Links.Set(string(body))
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(h.Config.GetHostLocation() + shortened))
+	w.Write([]byte(h.Conf.GetHostLocation() + shortened))
 }
 
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetOriginalURL(w http.ResponseWriter, r *http.Request) {
 	t := chi.URLParam(r, "id")
-	url, err := h.Storage.Get(t)
+	url, err := h.Links.Get(t)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
