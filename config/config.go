@@ -1,3 +1,4 @@
+// Package config provides an app configuration
 package config
 
 import (
@@ -7,12 +8,14 @@ import (
 	"strings"
 )
 
+// Config has all needed config fields for an app
 type Config struct {
 	ServerLocation string
 	ServerPort     int
 	HostLocation   string
 }
 
+// NewConfig creates a new instance of Config
 func NewConfig(serverLocation string, serverPort int, hostLocation string) *Config {
 	return &Config{
 		ServerLocation: serverLocation,
@@ -21,14 +24,19 @@ func NewConfig(serverLocation string, serverPort int, hostLocation string) *Conf
 	}
 }
 
+// GetServerConnectionString return string of server connection host
 func (c Config) GetServerConnectionString() string {
 	return fmt.Sprintf("%s:%v", c.ServerLocation, c.ServerPort)
 }
 
+// GetHostLocation returns a string og host location
 func (c Config) GetHostLocation() string {
 	return fmt.Sprintf("%s/", c.HostLocation)
 }
 
+// ParseServerConfig parses server config for host:port string into
+// ServerLocation and ServerPort variable
+// return error if param was incorrect or port is not number
 func (c *Config) ParseServerConfig(s string) error {
 	var err error
 
