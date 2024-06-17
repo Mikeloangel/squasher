@@ -1,18 +1,18 @@
 package handlers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
-	"github.com/Mikeloangel/squasher/internal/config"
+	"github.com/Mikeloangel/squasher/config"
 	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
 	Storage *storage.Storage
+	Config  *config.Config
 }
 
 func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
@@ -28,10 +28,9 @@ func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shortened := h.Storage.Set(string(body))
-	host := fmt.Sprintf("%s://%s:%s/", config.ServerProtocol, config.ServerName, config.ServerPort)
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(host + shortened))
+	w.Write([]byte(h.Config.GetHostLocation() + shortened))
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {

@@ -8,13 +8,16 @@ import (
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
+	"github.com/Mikeloangel/squasher/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPost(t *testing.T) {
 	links := storage.NewStorage()
+	config := config.NewConfig()
 	h := &handlers.Handler{
 		Storage: links,
+		Config:  config,
 	}
 
 	tests := []struct {
@@ -55,8 +58,10 @@ func TestPost(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	links := storage.NewStorage()
+	config := config.NewConfig()
 	h := &handlers.Handler{
 		Storage: links,
+		Config:  config,
 	}
 
 	h.Storage.Set("http://www.ya.ru/")
