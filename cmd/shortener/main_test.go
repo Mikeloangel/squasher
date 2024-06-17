@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Tests handlers for creation of short url
 func TestCreateShortURL(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -51,6 +52,7 @@ func TestCreateShortURL(t *testing.T) {
 	}
 }
 
+// Tests get original url
 func TestGetOriginalURL(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -90,6 +92,7 @@ func TestGetOriginalURL(t *testing.T) {
 	}
 }
 
+// Sets up handlers with app state and configuration
 func getHandlers() *handlers.Handler {
 	return handlers.NewHandler(
 		state.NewState(

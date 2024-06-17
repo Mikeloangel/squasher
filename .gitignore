@@ -26,3 +26,6 @@ vendor/
 shortenertest*
 test.log
 buildandtest.sh
+
+# others
+.DS_Store

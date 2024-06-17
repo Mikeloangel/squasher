@@ -1,3 +1,4 @@
+// Package handlers provides HTTP handlers for the URL shortener service.
 package handlers
 
 import (
@@ -9,16 +10,21 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Handler embeds the application state and provides methods to handle HTTP requests.
 type Handler struct {
 	state.State
 }
 
+// NewHandler creates a new Handler with the given application state.
 func NewHandler(appState state.State) *Handler {
 	return &Handler{
 		State: appState,
 	}
 }
 
+// CreateShortURL handles the creation of a shortened URL.
+// It reads the URL from the request body, generates a shortened version,
+// and returns it to the client.
 func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -37,6 +43,9 @@ func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(h.Conf.GetHostLocation() + shortened))
 }
 
+// GetOriginalURL handles the retrieval of the original URL for a given shortened version.
+// It reads the shortened URL from the request path, retrieves the original URL,
+// and redirects the client to the original URL.
 func (h *Handler) GetOriginalURL(w http.ResponseWriter, r *http.Request) {
 	t := chi.URLParam(r, "id")
 	url, err := h.Links.Get(t)
