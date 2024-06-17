@@ -1,3 +1,4 @@
+// Package handlers provides HTTP handlers for the URL shortener service.
 package handlers
 
 import (
@@ -5,17 +6,26 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
-	"github.com/Mikeloangel/squasher/config"
+	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/go-chi/chi/v5"
 )
 
+// Handler embeds the application state and provides methods to handle HTTP requests.
 type Handler struct {
-	Storage *storage.Storage
-	Config  *config.Config
+	state.State
 }
 
-func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
+// NewHandler creates a new Handler with the given application state.
+func NewHandler(appState state.State) *Handler {
+	return &Handler{
+		State: appState,
+	}
+}
+
+// CreateShortURL handles the creation of a shortened URL.
+// It reads the URL from the request body, generates a shortened version,
+// and returns it to the client.
+func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Body error", http.StatusBadRequest)
@@ -27,15 +37,18 @@ func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortened := h.Storage.Set(string(body))
+	shortened := h.Links.Set(string(body))
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(h.Config.GetHostLocation() + shortened))
+	w.Write([]byte(h.Conf.GetHostLocation() + shortened))
 }
 
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+// GetOriginalURL handles the retrieval of the original URL for a given shortened version.
+// It reads the shortened URL from the request path, retrieves the original URL,
+// and redirects the client to the original URL.
+func (h *Handler) GetOriginalURL(w http.ResponseWriter, r *http.Request) {
 	t := chi.URLParam(r, "id")
-	url, err := h.Storage.Get(t)
+	url, err := h.Links.Get(t)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

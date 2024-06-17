@@ -7,19 +7,14 @@ import (
 	"testing"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
+	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 	"github.com/Mikeloangel/squasher/config"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPost(t *testing.T) {
-	links := storage.NewStorage()
-	config := config.NewConfig()
-	h := &handlers.Handler{
-		Storage: links,
-		Config:  config,
-	}
-
+// Tests handlers for creation of short url
+func TestCreateShortURL(t *testing.T) {
 	tests := []struct {
 		name       string
 		body       string
@@ -40,6 +35,7 @@ func TestPost(t *testing.T) {
 		},
 	}
 
+	h := getHandlers()
 	router := Router(h)
 
 	for _, tt := range tests {
@@ -56,16 +52,8 @@ func TestPost(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
-	links := storage.NewStorage()
-	config := config.NewConfig()
-	h := &handlers.Handler{
-		Storage: links,
-		Config:  config,
-	}
-
-	h.Storage.Set("http://www.ya.ru/")
-
+// Tests get original url
+func TestGetOriginalURL(t *testing.T) {
 	tests := []struct {
 		name         string
 		url          string
@@ -86,6 +74,8 @@ func TestGet(t *testing.T) {
 		},
 	}
 
+	h := getHandlers()
+	h.Links.Set("http://www.ya.ru/")
 	router := Router(h)
 
 	for _, tt := range tests {
@@ -100,4 +90,14 @@ func TestGet(t *testing.T) {
 			assert.Equal(t, tt.wantLocation, rr.Header().Get("Location"), "handler неверный локейшен")
 		})
 	}
+}
+
+// Sets up handlers with app state and configuration
+func getHandlers() *handlers.Handler {
+	return handlers.NewHandler(
+		state.NewState(
+			storage.NewStorage(),
+			config.NewConfig("localhost", 8080, "http://localhost:8080"),
+		),
+	)
 }

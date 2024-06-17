@@ -1,70 +1,74 @@
+// Package main provides an entry point for the URL shortener service
 package main
 
 import (
-	"errors"
 	"flag"
+	"log"
 	"net/http"
-	"strconv"
-	"strings"
+	"os"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
+	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 	"github.com/Mikeloangel/squasher/config"
 	"github.com/go-chi/chi/v5"
 )
 
-var links *storage.Storage
-var conf *config.Config
-
+// main is the entry point to application
 func main() {
-	flag.Parse()
+	var err error
 
-	var handler = &handlers.Handler{
-		Storage: links,
-		Config:  conf,
+	// Initializes application state
+	appState := state.NewState(
+		storage.NewStorage(),
+		config.NewConfig("localhost", 8080, "http://localhost:8080"),
+	)
+
+	// Parses enviroment flags and command line flags
+	err = parseEnviroment(appState)
+	if err != nil {
+		log.Fatal(err)
+		return
 	}
 
-	err := http.ListenAndServe(conf.GetServerConnectionString(), Router(handler))
+	// Creates a new handler for application state
+	handler := handlers.NewHandler(appState)
+
+	// Starts HTTP server
+	err = http.ListenAndServe(appState.Conf.GetServerConnectionString(), Router(handler))
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
-func init() {
-	links = storage.NewStorage()
-	conf = config.NewConfig()
+// parseEnviroment parses environment variables and command-line flags
+// to configure the application state.
+func parseEnviroment(state state.State) error {
+	flag.StringVar(&state.Conf.HostLocation, "b", state.Conf.HostLocation, "Api host location to get redirect from")
+	flag.Func("a", "Sets server location and port in format host:port", state.Conf.ParseServerConfig)
+	flag.Parse()
 
-	setFlags()
-}
+	if baseURL := os.Getenv("BASE_URL"); baseURL != "" {
+		state.Conf.HostLocation = baseURL
+	}
 
-func setFlags() {
-	flag.StringVar(&conf.HostLocation, "b", conf.HostLocation, "Api host location to get redirect from")
-	flag.Func("a", "Sets server location and port in format host:port", func(s string) error {
-		var err error
-
-		host := strings.Split(s, ":")
-
-		if len(host) != 2 {
-			return errors.New("bad format for -b flag. Expected format host:port")
-		}
-
-		conf.ServerLocation = host[0]
-		conf.ServerPort, err = strconv.Atoi(host[1])
-
+	if serverAddr := os.Getenv("SERVER_ADDRESS"); serverAddr != "" {
+		err := state.Conf.ParseServerConfig(serverAddr)
 		if err != nil {
 			return err
 		}
+	}
 
-		return nil
-	})
+	return nil
 }
 
+// Router sets up the HTTP routes
 func Router(handler *handlers.Handler) chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", handler.Post)
-	r.Get("/{id}", handler.Get)
+	r.Post("/", handler.CreateShortURL)
+	r.Get("/{id}", handler.GetOriginalURL)
 
 	return r
 }
