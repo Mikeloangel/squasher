@@ -10,7 +10,7 @@ import (
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
-	"github.com/Mikeloangel/squasher/config"
+	"github.com/Mikeloangel/squasher/internal/config"
 	"github.com/go-chi/chi/v5"
 )
 
