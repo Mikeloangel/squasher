@@ -21,23 +21,32 @@ func NewStorage() *Storage {
 
 // Set stores the given URL and returns a shortened version of it.
 // If the URL is already stored, it returns the existing shortened version.
-func (s *Storage) Set(url string) string {
+func (s *Storage) Set(url string) StorageItem {
 	short := s.generateShortURL(url)
 	_, ok := s.data[short]
 	if !ok {
 		s.data[short] = url
 	}
-	return short
+
+	return StorageItem{
+		URL:     url,
+		Shorten: short,
+	}
 }
 
 // Get retrieves the original URL for the given shortened version.
 // It returns an error if the shortened URL is not found.
-func (s *Storage) Get(short string) (string, error) {
+func (s *Storage) Get(short string) (StorageItem, error) {
 	value, ok := s.data[short]
 	if !ok {
-		return "", errors.New("link not found")
+		return StorageItem{}, errors.New("link not found")
 	}
-	return value, nil
+
+	si := StorageItem{
+		URL:     value,
+		Shorten: short,
+	}
+	return si, nil
 }
 
 // generateShortURL generates a shortened version of the given URL
