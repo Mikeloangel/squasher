@@ -63,13 +63,12 @@ func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, i
 	result := h.Conf.GetHostLocation() + shortened.Shorten
 
 	// sends response
-	w.WriteHeader(http.StatusCreated)
-
 	if isJSON {
 		response := models.CreateShortURLResponse{Result: result}
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	} else {
 		w.Write([]byte(h.Conf.GetHostLocation() + shortened.Shorten))
 	}
+	w.WriteHeader(http.StatusCreated)
 }
