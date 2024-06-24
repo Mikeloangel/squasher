@@ -26,11 +26,11 @@ func (h *Handler) CreateShortURLJson(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleCreateShortURL is a helper function for creating a link depending on request type: JSON or plaint/text
-func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, isJson bool) {
+func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, isJSON bool) {
 	var url string
 
 	// parses request
-	if isJson {
+	if isJSON {
 		var request models.CreateShortURLRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -65,9 +65,9 @@ func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, i
 	// sends response
 	w.WriteHeader(http.StatusCreated)
 
-	if isJson {
+	if isJSON {
 		response := models.CreateShortURLResponse{Result: result}
-		w.Header().Set("Content-type", "application/json")
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	} else {
 		w.Write([]byte(h.Conf.GetHostLocation() + shortened.Shorten))
