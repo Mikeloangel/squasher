@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 	"github.com/Mikeloangel/squasher/internal/config"
+	"github.com/Mikeloangel/squasher/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,6 +90,46 @@ func TestGetOriginalURL(t *testing.T) {
 
 			assert.Equal(t, tt.wantStatus, rr.Code, "handler вернул неверный код ответа")
 			assert.Equal(t, tt.wantLocation, rr.Header().Get("Location"), "handler неверный локейшен")
+		})
+	}
+}
+
+// Tests handlers for creation of short url via api and json format
+func TestHandlerCreateShortURLJson(t *testing.T) {
+	tests := []struct {
+		name         string
+		body         models.CreateShortURLRequest
+		wantStatus   int
+		wantResponse models.CreateShortURLResponse
+	}{
+		{
+			name: "Valid URL",
+			body: models.CreateShortURLRequest{
+				URL: "http://www.ya.ru/",
+			},
+			wantStatus: http.StatusCreated,
+			wantResponse: models.CreateShortURLResponse{
+				Result: "http://localhost:8080/6f782b56",
+			},
+		},
+	}
+
+	h := getHandlers()
+	router := Router(h)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			request, _ := json.Marshal(tt.body)
+			req, err := http.NewRequest("POST", "/api/shorten", strings.NewReader(string(request)))
+			assert.NoError(t, err)
+
+			rr := httptest.NewRecorder()
+			router.ServeHTTP(rr, req)
+			assert.Equal(t, tt.wantStatus, rr.Code, "hanler вернул неверный статус код")
+			s := models.CreateShortURLResponse{}
+
+			json.Unmarshal(rr.Body.Bytes(), &s)
+			assert.Equal(t, tt.wantResponse.Result, s.Result, "handler вернул неверное тело")
 		})
 	}
 }
