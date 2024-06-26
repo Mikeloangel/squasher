@@ -70,6 +70,6 @@ func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, i
 		json.NewEncoder(w).Encode(response)
 	} else {
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(h.Conf.GetHostLocation() + shortened.Shorten))
+		w.Write([]byte(result))
 	}
 }
