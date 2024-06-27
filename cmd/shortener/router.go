@@ -11,7 +11,7 @@ import (
 func Router(handler *handlers.Handler) chi.Router {
 	r := chi.NewRouter()
 
-	r.Use(middlewares.Compress)
+	r.Use(middlewares.GzipMiddleware)
 	r.Use(logger.WithLoggerMiddleware)
 
 	registerShortURLRoutes(r, handler)
