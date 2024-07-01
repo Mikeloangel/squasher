@@ -2,14 +2,14 @@
 package handlers
 
 import (
-	"github.com/Mikeloangel/squasher/cmd/shortener/interfaces"
 	"github.com/Mikeloangel/squasher/cmd/shortener/state"
+	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 	"github.com/Mikeloangel/squasher/internal/config"
 )
 
 // Handler embeds the application state and provides methods to handle HTTP requests.
 type Handler struct {
-	Links interfaces.Storager
+	Links storage.Storager
 	Conf  *config.Config
 }
 

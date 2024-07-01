@@ -19,18 +19,33 @@ func main() {
 	// Initializing app logger
 	logger.Init("info")
 
-	// Initializes application state
-	appState := state.NewState(
-		storage.NewStorage(),
-		config.NewConfig("localhost", 8080, "http://localhost:8080"),
+	// Inits config
+	cfg := config.NewConfig(
+		"localhost",
+		8080,
+		"http://localhost:8080",
+		"/tmp/short-url-db.json",
 	)
 
 	// Parses enviroment flags and command line flags
-	err = parseEnviroment(appState)
+	err = parseEnviroment(cfg)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+
+	// Gets storage implementation
+	storage := storage.NewStorageFactory(cfg)
+
+	// Inits storage
+	err = storage.Init()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Initializes application state
+	appState := state.NewState(storage, cfg)
 
 	// Creates a new handler for application state
 	handler := handlers.NewHandler(appState)

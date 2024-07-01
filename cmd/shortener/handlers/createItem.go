@@ -59,7 +59,11 @@ func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, i
 	}
 
 	// adds link
-	shortened := h.Links.Set(url)
+	shortened, err := h.Links.Set(url)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	result := h.Conf.GetHostLocation() + shortened.Shorten
 
 	// sends response
