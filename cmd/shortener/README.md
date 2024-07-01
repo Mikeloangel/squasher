@@ -40,6 +40,11 @@ To install and run the URL Shortener Service, follow these steps:
 
 The URL Shortener Service can be configured using command-line flags or environment variables.
 
+### Settings priority
+The most priority has Enviromental variables
+Nex command-line flags
+If none provided uses default settings
+
 ### Command-Line Flags
 
 - `-b`: API host location to get redirect from (default: `http://localhost:8080`)
@@ -52,8 +57,8 @@ Example:
 
 ### Enviromental variables
 
-- BASE_URL: API host location to get redirect from (default: http://localhost:8080)
-- SERVER_ADDRESS: Server location and port in format host:port (default: localhost:8080)
+- `BASE_URL`: API host location to get redirect from (default: `http://localhost:8080`)
+- `SERVER_ADDRESS`: Server location and port in format host:port (default: `localhost:8080`)
 
 Example:
 ```sh

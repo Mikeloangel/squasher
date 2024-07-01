@@ -10,17 +10,24 @@ import (
 
 // Config has all needed config fields for an app
 type Config struct {
-	ServerLocation string
-	ServerPort     int
-	HostLocation   string
+	ServerLocation      string
+	ServerPort          int
+	HostLocation        string
+	StorageFileLocation string
 }
 
 // NewConfig creates a new instance of Config
-func NewConfig(serverLocation string, serverPort int, hostLocation string) *Config {
+func NewConfig(
+	serverLocation string,
+	serverPort int,
+	hostLocation string,
+	storageFileLocation string,
+) *Config {
 	return &Config{
-		ServerLocation: serverLocation,
-		ServerPort:     serverPort,
-		HostLocation:   hostLocation,
+		ServerLocation:      serverLocation,
+		ServerPort:          serverPort,
+		HostLocation:        hostLocation,
+		StorageFileLocation: storageFileLocation,
 	}
 }
 
