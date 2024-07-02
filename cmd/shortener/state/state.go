@@ -3,7 +3,7 @@ package state
 
 import (
 	"github.com/Mikeloangel/squasher/cmd/shortener/interfaces"
-	"github.com/Mikeloangel/squasher/config"
+	"github.com/Mikeloangel/squasher/internal/config"
 )
 
 // State holds the application state, including configuration and storage.

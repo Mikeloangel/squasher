@@ -10,13 +10,17 @@ import (
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/state"
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
-	"github.com/Mikeloangel/squasher/config"
+	"github.com/Mikeloangel/squasher/internal/config"
+	"github.com/Mikeloangel/squasher/internal/logger"
 	"github.com/go-chi/chi/v5"
 )
 
 // main is the entry point to application
 func main() {
 	var err error
+
+	// Initializing app logger
+	logger.Init("info")
 
 	// Initializes application state
 	appState := state.NewState(
@@ -67,8 +71,8 @@ func parseEnviroment(state state.State) error {
 func Router(handler *handlers.Handler) chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", handler.CreateShortURL)
-	r.Get("/{id}", handler.GetOriginalURL)
+	r.Post("/", logger.WithLoggerMiddleware(handler.CreateShortURL))
+	r.Get("/{id}", logger.WithLoggerMiddleware(handler.GetOriginalURL))
 
 	return r
 }
