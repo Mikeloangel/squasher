@@ -79,7 +79,7 @@ func TestGetOriginalURL(t *testing.T) {
 	}
 
 	h := getHandlers()
-	h.Links.Set("http://www.ya.ru/")
+	h.Storage.StoreURL("http://www.ya.ru/")
 	router := Router(h)
 
 	for _, tt := range tests {

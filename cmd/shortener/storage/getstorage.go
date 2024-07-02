@@ -8,7 +8,7 @@ import (
 
 // NewStorageFactory creates correct storage implementation depending on config
 func NewStorageFactory(cfg *config.Config) Storager {
-	// not empty file storage returns FileStorage
+	// not empty file storage location returns FileStorage
 	if len(strings.TrimSpace(cfg.StorageFileLocation)) > 0 {
 		return NewFileStorage(cfg)
 	}

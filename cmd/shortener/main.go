@@ -2,7 +2,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
@@ -28,9 +27,9 @@ func main() {
 	)
 
 	// Parses enviroment flags and command line flags
-	err = parseEnviroment(cfg)
+	err = config.ParseEnvironment(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
@@ -40,7 +39,7 @@ func main() {
 	// Inits storage
 	err = storage.Init()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
@@ -54,6 +53,6 @@ func main() {
 	err = http.ListenAndServe(appState.Conf.GetServerConnectionString(), Router(handler))
 
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 }

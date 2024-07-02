@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/Mikeloangel/squasher/internal/config"
@@ -25,11 +26,11 @@ func NewFileStorage(cfg *config.Config) Storager {
 
 // Set stores the given URL and returns a shortened version of it.
 // If the URL is already stored, it returns the existing shortened version.
-func (s *FileStorage) Set(url string) (StorageItem, error) {
-	short := urlgenerator.GenerateShortURL(url)
+func (s *FileStorage) StoreURL(url string) (StorageItem, error) {
+	short := urlgenerator.HashURL(url)
 
 	// Tries to get already existed file
-	si, err := s.Get(short)
+	si, err := s.FetchURL(short)
 	if err == nil {
 		return si, nil
 	}
@@ -62,12 +63,12 @@ func (s *FileStorage) Set(url string) (StorageItem, error) {
 
 // Get retrieves the original URL for the given shortened version.
 // It returns an error if the shortened URL is not found.
-func (s *FileStorage) Get(short string) (StorageItem, error) {
+func (s *FileStorage) FetchURL(short string) (StorageItem, error) {
 	si := StorageItem{}
 
 	file, err := os.Open(s.fileLocation)
 	if err != nil {
-		return si, err
+		return si, fmt.Errorf("filestorage failed to open file at FetchURL")
 	}
 	defer file.Close()
 

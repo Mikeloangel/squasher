@@ -1,15 +1,13 @@
-package main
+package config
 
 import (
 	"flag"
 	"os"
-
-	"github.com/Mikeloangel/squasher/internal/config"
 )
 
-// parseEnviroment parses environment variables and command-line flags
+// parseEnvironment parses environment variables and command-line flags
 // to configure the application state.
-func parseEnviroment(Conf *config.Config) error {
+func ParseEnvironment(Conf *Config) error {
 	flag.StringVar(&Conf.HostLocation, "b", Conf.HostLocation, "Api host location to get redirect from")
 	flag.StringVar(&Conf.StorageFileLocation, "f", Conf.StorageFileLocation, "Storage file location, if empty uses in memory handling")
 	flag.Func("a", "Sets server location and port in format host:port", Conf.ParseServerConfig)

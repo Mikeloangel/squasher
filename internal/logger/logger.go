@@ -1,4 +1,4 @@
-// Package singleton logger add a logging functionality to app
+// Package logger provides adaptor implementation for app logger
 package logger
 
 import (
@@ -6,7 +6,7 @@ import (
 )
 
 // Log is the global logger instance.
-var Log *zap.Logger = zap.NewNop()
+var log *zap.SugaredLogger = zap.NewNop().Sugar()
 
 // Init initializes the logger with the given level.
 func Init(level string) error {
@@ -23,6 +23,22 @@ func Init(level string) error {
 		return err
 	}
 
-	Log = procuctionLogger
+	log = procuctionLogger.Sugar()
 	return nil
+}
+
+func Debug(args ...interface{}) {
+	log.Debugln(args...)
+}
+
+func Info(args ...interface{}) {
+	log.Infoln(args)
+}
+
+func Error(args ...interface{}) {
+	log.Errorln(args)
+}
+
+func Fatal(args ...interface{}) {
+	log.Fatalln(args...)
 }

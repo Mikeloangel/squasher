@@ -21,8 +21,8 @@ func NewInMemoryStorage() Storager {
 
 // Set stores the given URL and returns a shortened version of it.
 // If the URL is already stored, it returns the existing shortened version.
-func (s *InMemoryStorage) Set(url string) (StorageItem, error) {
-	short := urlgenerator.GenerateShortURL(url)
+func (s *InMemoryStorage) StoreURL(url string) (StorageItem, error) {
+	short := urlgenerator.HashURL(url)
 	_, ok := s.data[short]
 	if !ok {
 		s.data[short] = url
@@ -36,7 +36,7 @@ func (s *InMemoryStorage) Set(url string) (StorageItem, error) {
 
 // Get retrieves the original URL for the given shortened version.
 // It returns an error if the shortened URL is not found.
-func (s *InMemoryStorage) Get(short string) (StorageItem, error) {
+func (s *InMemoryStorage) FetchURL(short string) (StorageItem, error) {
 	value, ok := s.data[short]
 	if !ok {
 		return StorageItem{}, errors.New("link not found")
