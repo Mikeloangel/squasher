@@ -7,14 +7,14 @@ import (
 )
 
 // WithLoggerMiddleware logs details about the HTTP request and response.
-func WithLoggerMiddleware(h http.HandlerFunc) http.HandlerFunc {
+func WithLoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		uri := r.URL.Path
 		method := r.Method
 		start := time.Now()
 
 		loggingWriter := wrapResponseWriter(w)
-		h.ServeHTTP(loggingWriter, r)
+		next.ServeHTTP(loggingWriter, r)
 		duration := time.Since(start)
 
 		Log.Sugar().Infoln(
@@ -27,7 +27,7 @@ func WithLoggerMiddleware(h http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-// wrapResponseWriter wraps Response writer with injected reponseData to be colected
+// wrapResponseWriter wraps Response writer with injected reponseData to be captured
 func wrapResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 	responseData := &responseData{
 		size:       0,
