@@ -14,44 +14,15 @@ import (
 // It reads the URL from the request body, generates a shortened version,
 // and returns it to the client.
 func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
-	h.handleCreateShortURL(w, r, false)
-}
-
-// CreateShortURLJson handles the creation of a shortened URL.
-// uses json format for request and response
-// It reads the URL from the request body, generates a shortened version,
-// and returns it to the client.
-func (h *Handler) CreateShortURLJson(w http.ResponseWriter, r *http.Request) {
-	h.handleCreateShortURL(w, r, true)
-}
-
-// handleCreateShortURL is a helper function for creating a link depending on request type: JSON or plaint/text
-func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, isJSON bool) {
 	var url string
 
 	// parses request
-	if isJSON {
-		var request models.CreateShortURLRequest
-
-		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if err := models.ValidateCreateShortURLRequest(&request); err != nil {
-			http.Error(w, fmt.Sprintf("Validation error: %s", err.Error()), http.StatusBadRequest)
-			return
-		}
-
-		url = request.URL
-	} else {
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "Body error", http.StatusBadRequest)
-			return
-		}
-		url = string(body)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Body error", http.StatusBadRequest)
+		return
 	}
+	url = string(body)
 
 	if len(strings.TrimSpace(url)) == 0 {
 		http.Error(w, "empty body", http.StatusBadRequest)
@@ -59,17 +30,58 @@ func (h *Handler) handleCreateShortURL(w http.ResponseWriter, r *http.Request, i
 	}
 
 	// adds link
-	shortened := h.Links.Set(url)
+	shortened, err := h.Storage.StoreURL(url)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	result := h.Conf.GetHostLocation() + shortened.Shorten
 
 	// sends response
-	if isJSON {
-		response := models.CreateShortURLResponse{Result: result}
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(response)
-	} else {
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(result))
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(result))
+
+}
+
+// CreateShortURLJson handles the creation of a shortened URL.
+// uses json format for request and response
+// It reads the URL from the request body, generates a shortened version,
+// and returns it to the client.
+func (h *Handler) CreateShortURLJson(w http.ResponseWriter, r *http.Request) {
+	var url string
+
+	// parses request
+	var request models.CreateShortURLRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+
+	if err := models.ValidateCreateShortURLRequest(&request); err != nil {
+		http.Error(w, fmt.Sprintf("Validation error: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	url = request.URL
+
+	if len(strings.TrimSpace(url)) == 0 {
+		http.Error(w, "empty body", http.StatusBadRequest)
+		return
+	}
+
+	// adds link
+	shortened, err := h.Storage.StoreURL(url)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	result := h.Conf.GetHostLocation() + shortened.Shorten
+
+	// sends response
+	response := models.CreateShortURLResponse{Result: result}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+
 }

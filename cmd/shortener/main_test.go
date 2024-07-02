@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -77,7 +79,7 @@ func TestGetOriginalURL(t *testing.T) {
 	}
 
 	h := getHandlers()
-	h.Links.Set("http://www.ya.ru/")
+	h.Storage.StoreURL("http://www.ya.ru/")
 	router := Router(h)
 
 	for _, tt := range tests {
@@ -136,10 +138,23 @@ func TestHandlerCreateShortURLJson(t *testing.T) {
 
 // Sets up handlers with app state and configuration
 func getHandlers() *handlers.Handler {
+	var err error
+
+	cfg := config.NewConfig(
+		"localhost",
+		8080,
+		"http://localhost:8080",
+		"/tmp/short-url-db.json",
+	)
+
+	storage := storage.NewInMemoryStorage()
+	err = storage.Init()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
 	return handlers.NewHandler(
-		state.NewState(
-			storage.NewStorage(),
-			config.NewConfig("localhost", 8080, "http://localhost:8080"),
-		),
+		state.NewState(storage, cfg),
 	)
 }

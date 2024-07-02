@@ -11,7 +11,7 @@ import (
 // and redirects the client to the original URL.
 func (h *Handler) GetOriginalURL(w http.ResponseWriter, r *http.Request) {
 	t := chi.URLParam(r, "id")
-	url, err := h.Links.Get(t)
+	url, err := h.Storage.FetchURL(t)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

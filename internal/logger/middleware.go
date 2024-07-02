@@ -17,7 +17,7 @@ func WithLoggerMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(loggingWriter, r)
 		duration := time.Since(start)
 
-		Log.Sugar().Infoln(
+		Info(
 			"uri", uri,
 			"method", method,
 			"duration", duration,
@@ -28,13 +28,13 @@ func WithLoggerMiddleware(next http.Handler) http.Handler {
 }
 
 // wrapResponseWriter wraps Response writer with injected reponseData to be captured
-func wrapResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
+func wrapResponseWriter(w http.ResponseWriter) *logResponseWriter {
 	responseData := &responseData{
 		size:       0,
 		statusCode: 0,
 	}
 
-	return &loggingResponseWriter{
+	return &logResponseWriter{
 		ResponseWriter: w,
 		responseData:   responseData,
 	}
