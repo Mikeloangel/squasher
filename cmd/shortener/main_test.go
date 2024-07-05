@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -145,6 +146,7 @@ func getHandlers() *handlers.Handler {
 		8080,
 		"http://localhost:8080",
 		"/tmp/short-url-db.json",
+		"",
 	)
 
 	storage := storage.NewInMemoryStorage()
@@ -155,6 +157,6 @@ func getHandlers() *handlers.Handler {
 	}
 
 	return handlers.NewHandler(
-		state.NewState(storage, cfg),
+		state.NewState(storage, cfg, &sql.DB{}),
 	)
 }

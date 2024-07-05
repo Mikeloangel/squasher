@@ -31,4 +31,5 @@ func registerAPIRoutes(r chi.Router, handler *handlers.Handler) {
 func registerShortURLRoutes(r chi.Router, handler *handlers.Handler) {
 	r.Post("/", handler.CreateShortURL)
 	r.Get("/{id}", handler.GetOriginalURL)
+	r.Get("/ping", handler.Ping)
 }

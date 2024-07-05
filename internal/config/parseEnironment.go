@@ -10,6 +10,7 @@ import (
 func ParseEnvironment(Conf *Config) error {
 	flag.StringVar(&Conf.HostLocation, "b", Conf.HostLocation, "Api host location to get redirect from")
 	flag.StringVar(&Conf.StorageFileLocation, "f", Conf.StorageFileLocation, "Storage file location, if empty uses in memory handling")
+	flag.StringVar(&Conf.DbDSN, "d", Conf.DbDSN, "Db DSN connetction string")
 	flag.Func("a", "Sets server location and port in format host:port", Conf.ParseServerConfig)
 	flag.Parse()
 
@@ -19,6 +20,10 @@ func ParseEnvironment(Conf *Config) error {
 
 	if storageFileLoaction := os.Getenv("FILE_STORAGE_PATH"); storageFileLoaction != "" {
 		Conf.StorageFileLocation = storageFileLoaction
+	}
+
+	if dsnString := os.Getenv("DATABASE_DSN"); dsnString != "" {
+		Conf.DbDSN = dsnString
 	}
 
 	if serverAddr := os.Getenv("SERVER_ADDRESS"); serverAddr != "" {

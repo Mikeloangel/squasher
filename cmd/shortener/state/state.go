@@ -2,6 +2,8 @@
 package state
 
 import (
+	"database/sql"
+
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 	"github.com/Mikeloangel/squasher/internal/config"
 )
@@ -12,12 +14,15 @@ type State struct {
 	Storage storage.Storager
 	// Conf holds the application configuration.
 	Conf *config.Config
+	// database connection
+	DB *sql.DB
 }
 
 // NewState creates a new instance of State with the provided storage and configuration.
-func NewState(storage storage.Storager, conf *config.Config) State {
+func NewState(storage storage.Storager, conf *config.Config, db *sql.DB) State {
 	return State{
 		Storage: storage,
 		Conf:    conf,
+		DB:      db,
 	}
 }

@@ -2,6 +2,8 @@
 package main
 
 import (
+	_ "github.com/jackc/pgx/v5/stdlib"
+
 	"net/http"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
@@ -24,6 +26,7 @@ func main() {
 		8080,
 		"http://localhost:8080",
 		"/tmp/short-url-db.json",
+		"",
 	)
 
 	// Parses enviroment flags and command line flags
@@ -32,6 +35,10 @@ func main() {
 		logger.Fatal(err)
 		return
 	}
+
+	// Get db
+	db := config.GetDB(cfg)
+	defer db.Close()
 
 	// Gets storage implementation
 	storage := storage.NewStorageFactory(cfg)
@@ -44,7 +51,7 @@ func main() {
 	}
 
 	// Initializes application state
-	appState := state.NewState(storage, cfg)
+	appState := state.NewState(storage, cfg, db)
 
 	// Creates a new handler for application state
 	handler := handlers.NewHandler(appState)
