@@ -16,7 +16,7 @@ type Config struct {
 
 	StorageFileLocation string
 
-	DbDSN string
+	DBDSN string
 }
 
 // NewConfig creates a new instance of Config
@@ -25,14 +25,14 @@ func NewConfig(
 	serverPort int,
 	hostLocation string,
 	storageFileLocation string,
-	dbDSN string,
+	DBDSN string,
 ) *Config {
 	return &Config{
 		ServerLocation:      serverLocation,
 		ServerPort:          serverPort,
 		HostLocation:        hostLocation,
 		StorageFileLocation: storageFileLocation,
-		DbDSN:               dbDSN,
+		DBDSN:               DBDSN,
 	}
 }
 

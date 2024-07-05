@@ -8,7 +8,7 @@ import (
 
 // GetDB opens connection to db
 func GetDB(conf *Config) *sql.DB {
-	db, err := sql.Open("pgx", conf.DbDSN)
+	db, err := sql.Open("pgx", conf.DBDSN)
 	if err != nil {
 		logger.Fatal(err)
 		return &sql.DB{}
