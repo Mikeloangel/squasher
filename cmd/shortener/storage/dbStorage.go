@@ -13,7 +13,7 @@ type DBStorage struct {
 }
 
 // NewDbStorage creates a new instance of file storage
-func NewDbStorage(db *sql.DB) Storager {
+func NewDBStorage(db *sql.DB) Storager {
 	return &DBStorage{
 		db: db,
 	}
@@ -64,8 +64,8 @@ func (ds *DBStorage) FetchURL(short string) (StorageItem, error) {
 }
 
 // Init opens file to write
-func (s *DBStorage) Init() error {
-	err := s.createSchemasIfNotExist()
+func (ds *DBStorage) Init() error {
+	err := ds.createSchemasIfNotExist()
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (s *DBStorage) Init() error {
 }
 
 // createSchemasIfNotExist creates links table
-func (s *DBStorage) createSchemasIfNotExist() error {
+func (ds *DBStorage) createSchemasIfNotExist() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -86,7 +86,7 @@ func (s *DBStorage) createSchemasIfNotExist() error {
 	);
 	`
 
-	_, err := s.db.ExecContext(ctx, stm)
+	_, err := ds.db.ExecContext(ctx, stm)
 	if err != nil {
 		return err
 	}
