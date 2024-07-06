@@ -41,7 +41,7 @@ func main() {
 	defer db.Close()
 
 	// Gets storage implementation
-	storage := storage.NewStorageFactory(cfg)
+	storage := storage.NewStorageFactory(cfg, db)
 
 	// Inits storage
 	err = storage.Init()
