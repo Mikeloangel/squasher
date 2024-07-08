@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// compressWriter wraps the standard http.ResponseWriter to add gzip compression.
 type compressWriter struct {
 	w  http.ResponseWriter
 	zw *gzip.Writer
@@ -30,6 +31,7 @@ func (c *compressWriter) Write(p []byte) (int, error) {
 func (c *compressWriter) WriteHeader(statusCode int) {
 	if statusCode < http.StatusMultipleChoices {
 		c.w.Header().Set("Content-Encoding", "gzip")
+		c.w.Header().Del("Content-Length") // Remove Content-Length header
 	}
 	c.w.WriteHeader(statusCode)
 }
@@ -38,6 +40,7 @@ func (c *compressWriter) Close() error {
 	return c.zw.Close()
 }
 
+// compressReader wraps the standard io.ReadCloser to add gzip decompression.
 type compressReader struct {
 	r  io.ReadCloser
 	zr *gzip.Reader
@@ -55,7 +58,7 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	}, nil
 }
 
-func (c compressReader) Read(p []byte) (n int, err error) {
+func (c *compressReader) Read(p []byte) (n int, err error) {
 	return c.zr.Read(p)
 }
 
@@ -66,6 +69,7 @@ func (c *compressReader) Close() error {
 	return c.zr.Close()
 }
 
+// GzipMiddleware compresses HTTP responses using gzip.
 func GzipMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ow := w

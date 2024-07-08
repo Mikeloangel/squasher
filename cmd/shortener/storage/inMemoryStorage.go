@@ -53,3 +53,15 @@ func (s *InMemoryStorage) FetchURL(short string) (StorageItem, error) {
 func (s *InMemoryStorage) Init() error {
 	return nil
 }
+
+// MultiStoreUrl creates for slice of links with options shorten version
+func (s *InMemoryStorage) MultiStoreUrl(items *[]StorageItemOptionsInterface) error {
+	for i, v := range *items {
+		si, err := s.StoreURL(v.GetStorageItem().URL)
+		if err != nil {
+			return err
+		}
+		(*items)[i].GetStorageItem().Shorten = si.Shorten
+	}
+	return nil
+}

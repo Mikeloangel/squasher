@@ -34,11 +34,11 @@ func (ds *DBStorage) StoreURL(url string) (StorageItem, error) {
 		Shorten: short,
 	}
 
-	stm := `insert into links (short_id, original) values ($1,$2) returning id`
+	query := `insert into links (short_id, original) values ($1,$2) returning id`
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	row := ds.db.QueryRowContext(ctx, stm, short, url)
+	row := ds.db.QueryRowContext(ctx, query, short, url)
 	err = row.Scan(&si.ID)
 	if err != nil {
 		return si, err
@@ -56,9 +56,9 @@ func (ds *DBStorage) FetchURL(short string) (StorageItem, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stm := `select id, short_id, original from links where short_id=$1`
+	query := `select id, short_id, original from links where short_id=$1`
 
-	row := ds.db.QueryRowContext(ctx, stm, short)
+	row := ds.db.QueryRowContext(ctx, query, short)
 	err = row.Scan(&si.ID, &si.Shorten, &si.URL)
 	return si, err
 }
@@ -78,17 +78,75 @@ func (ds *DBStorage) createSchemasIfNotExist() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stm := `
+	query := `
 	create table if not exists links(
 		id serial primary key,
-		short_id varchar(50) not null UNIQUE,
-		original VARCHAR(9000) not null UNIQUE
+		short_id varchar(50) not null,
+		original VARCHAR(9000) not null,
+		created_at timestamp not null default CURRENT_TIMESTAMP,
+		UNIQUE (short_id, original)
 	);
 	`
 
-	_, err := ds.db.ExecContext(ctx, stm)
+	_, err := ds.db.ExecContext(ctx, query)
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// MultiStoreUrl creates for slice of StorageItemOptionsInterface links and updates items
+func (ds *DBStorage) MultiStoreUrl(items *[]StorageItemOptionsInterface) error {
+	query := `
+	insert into links (short_id, original) 
+		values($1, $2)
+		ON CONFLICT (short_id, original) 
+    	DO NOTHING
+		returning id, short_id
+	`
+	selectQuery := `select id, short_id from links where original = $1`
+
+	tx, err := ds.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	selectStmt, err := tx.PrepareContext(ctx, selectQuery)
+	if err != nil {
+		return err
+	}
+	defer selectStmt.Close()
+
+	for _, v := range *items {
+		si := v.GetStorageItem()
+		shorten := urlgenerator.HashURL(si.URL)
+		row := stmt.QueryRowContext(ctx, shorten, si.URL)
+		err := row.Scan(&si.ID, &si.Shorten)
+
+		// on conflict select
+		if err == sql.ErrNoRows {
+			row = selectStmt.QueryRowContext(ctx, si.URL)
+			err = row.Scan(&si.ID, &si.Shorten)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		} else if err != nil {
+			tx.Rollback()
+			return err
+		}
+		si.Shorten = shorten
+	}
+
+	tx.Commit()
 	return nil
 }

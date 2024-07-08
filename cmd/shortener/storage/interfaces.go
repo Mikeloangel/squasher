@@ -13,4 +13,23 @@ type Storager interface {
 
 	// Init initializes storage
 	Init() error
+
+	// MultiStoreUrl sets multiple items to storage
+	// usage of StorageItemOptionsInterface allows to process multiple items with additional data
+	MultiStoreUrl(items *[]StorageItemOptionsInterface) error
+}
+
+// StorageItemOptionsInterface defines methods for StorageItem wrappers
+// to handle additional fields for specific implementations
+// see StorageItemWithCorrelationId for example
+type StorageItemOptionsInterface interface {
+	// SetOptions extends StorageItem with additional fields
+
+	SetOptions(options ...interface{}) error
+
+	// GetOptions returns options for wrapper
+	GetOptions() ([]interface{}, error)
+
+	// GetStorageItem return pointer to StorageItem
+	GetStorageItem() *StorageItem
 }

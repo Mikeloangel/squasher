@@ -22,8 +22,9 @@ func Router(handler *handlers.Handler) chi.Router {
 
 // registerAPIRoutes registers API routes
 func registerAPIRoutes(r chi.Router, handler *handlers.Handler) {
-	r.Route("/api", func(r chi.Router) {
-		r.Post("/shorten", handler.CreateShortURLJson)
+	r.Route("/api/shorten", func(r chi.Router) {
+		r.Post("/", handler.CreateShortURLJson)
+		r.Post("/batch", handler.CreateBatchUrls)
 	})
 }
 
