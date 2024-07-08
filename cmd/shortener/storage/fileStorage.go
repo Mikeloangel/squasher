@@ -103,8 +103,8 @@ func (s *FileStorage) Init() error {
 	return nil
 }
 
-// MultiStoreUrl creates for slice of links with options shorten version
-func (s *FileStorage) MultiStoreUrl(items *[]StorageItemOptionsInterface) error {
+// MultiStoreURL creates for slice of links with options shorten version
+func (s *FileStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
 	for i, v := range *items {
 		si, err := s.StoreURL(v.GetStorageItem().URL)
 		if err != nil {

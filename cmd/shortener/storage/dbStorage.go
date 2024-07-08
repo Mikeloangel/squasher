@@ -95,8 +95,8 @@ func (ds *DBStorage) createSchemasIfNotExist() error {
 	return nil
 }
 
-// MultiStoreUrl creates for slice of StorageItemOptionsInterface links and updates items
-func (ds *DBStorage) MultiStoreUrl(items *[]StorageItemOptionsInterface) error {
+// MultiStoreURL creates for slice of StorageItemOptionsInterface links and updates items
+func (ds *DBStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
 	query := `
 	insert into links (short_id, original) 
 		values($1, $2)

@@ -6,23 +6,23 @@ import (
 	"strconv"
 )
 
-// StorageItemWithCorrelationId is a wrapper for StorageItem to utilize batch inserion api
+// StorageItemWithCorrelationID is a wrapper for StorageItem to utilize batch inserion api
 // endpoint to pass correlation_id from request to response
-type StorageItemWithCorrelationId struct {
+type StorageItemWithCorrelationID struct {
 	StorageItem
-	CorrelationId string `json:"correlation_id"`
+	CorrelationID string `json:"correlation_id"`
 	options       []interface{}
 }
 
-// SetOptions adds CorrelationId param and options
-func (m *StorageItemWithCorrelationId) SetOptions(options ...interface{}) error {
+// SetOptions adds CorrelationID param and options
+func (m *StorageItemWithCorrelationID) SetOptions(options ...interface{}) error {
 	m.options = options
 	opt := options[0]
 	switch v := opt.(type) {
 	case int:
-		m.CorrelationId = strconv.Itoa(v)
+		m.CorrelationID = strconv.Itoa(v)
 	case string:
-		m.CorrelationId = v
+		m.CorrelationID = v
 	default:
 		return fmt.Errorf("multiStoreStorageItem cant convert correlation_od")
 	}
@@ -30,18 +30,18 @@ func (m *StorageItemWithCorrelationId) SetOptions(options ...interface{}) error 
 }
 
 // GetOptions return options
-func (m *StorageItemWithCorrelationId) GetOptions() ([]interface{}, error) {
+func (m *StorageItemWithCorrelationID) GetOptions() ([]interface{}, error) {
 	return m.options, nil
 }
 
 // GetStorageItem provides access to StorageItem
-func (m *StorageItemWithCorrelationId) GetStorageItem() *StorageItem {
+func (m *StorageItemWithCorrelationID) GetStorageItem() *StorageItem {
 	return &m.StorageItem
 }
 
 // MarshalJSON adds Marshaler interface support
-func (m *StorageItemWithCorrelationId) MarshalJSON() ([]byte, error) {
-	cid := m.CorrelationId
+func (m *StorageItemWithCorrelationID) MarshalJSON() ([]byte, error) {
+	cid := m.CorrelationID
 	shorten := m.Shorten
 
 	return json.Marshal(&struct {

@@ -10,7 +10,7 @@ import (
 // CreateBatchUrls creates for multiple url request shorten url
 func (h *Handler) CreateBatchUrls(w http.ResponseWriter, r *http.Request) {
 	// unmarshall request items
-	var storageItems []storage.StorageItemWithCorrelationId
+	var storageItems []storage.StorageItemWithCorrelationID
 	if err := json.NewDecoder(r.Body).Decode(&storageItems); err != nil {
 		http.Error(w, "invalid request payload", http.StatusBadRequest)
 		return
@@ -23,7 +23,7 @@ func (h *Handler) CreateBatchUrls(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send to storage interface
-	if err := h.Storage.MultiStoreUrl(&optionItems); err != nil {
+	if err := h.Storage.MultiStoreURL(&optionItems); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
