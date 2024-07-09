@@ -14,8 +14,8 @@ func (conflict ItemAlreadyExistsError) Error() string {
 }
 
 // Unwrap implements Error interface
-func (conflic ItemAlreadyExistsError) Unwrap() error {
-	return conflic.Err
+func (conflict ItemAlreadyExistsError) Unwrap() error {
+	return conflict.Err
 }
 
 // NewItemAlreadyExistsError returns new ItemAlreadyExistsError error
