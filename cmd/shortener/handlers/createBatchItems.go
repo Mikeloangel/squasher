@@ -16,9 +16,15 @@ func (h *Handler) CreateBatchUrls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// convert to interface (why?)
+	// convert to interface (why is this needed?)
 	var optionItems []storage.StorageItemOptionsInterface
 	for i := range storageItems {
+		err := storage.ValidateStorageItemWithCorrelationIDRequest(&storageItems[i])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		optionItems = append(optionItems, &storageItems[i])
 	}
 

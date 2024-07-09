@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
+
+	"github.com/asaskevich/govalidator"
 )
 
 // StorageItemWithCorrelationID is a wrapper for StorageItem to utilize batch inserion api
 // endpoint to pass correlation_id from request to response
 type StorageItemWithCorrelationID struct {
 	StorageItem
-	CorrelationID string `json:"correlation_id"`
+	CorrelationID string `json:"correlation_id" valid:"required"`
 	options       []interface{}
 }
 
@@ -51,4 +54,18 @@ func (m *StorageItemWithCorrelationID) MarshalJSON() ([]byte, error) {
 		Cid:      cid,
 		Original: shorten,
 	})
+}
+
+func ValidateStorageItemWithCorrelationIDRequest(req *StorageItemWithCorrelationID) error {
+	var err error
+	if strings.TrimSpace(req.URL) == "" {
+		return fmt.Errorf("original_url in request is required in each row for ID:" + req.CorrelationID)
+	}
+
+	isUrl := govalidator.IsURL(req.URL)
+	if !isUrl {
+		return fmt.Errorf("original_url in each row has to be valid url for ID:" + req.CorrelationID)
+	}
+	_, err = govalidator.ValidateStruct(req)
+	return err
 }
