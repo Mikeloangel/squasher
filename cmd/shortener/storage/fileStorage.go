@@ -29,10 +29,10 @@ func NewFileStorage(cfg *config.Config) Storager {
 func (s *FileStorage) StoreURL(url string) (StorageItem, error) {
 	short := urlgenerator.HashURL(url)
 
-	// Tries to get already existed file
+	// Tries to get already existed url
 	si, err := s.FetchURL(short)
 	if err == nil {
-		return si, nil
+		return si, NewItemAlreadyExistsError(nil, url)
 	}
 
 	si = StorageItem{
@@ -107,7 +107,8 @@ func (s *FileStorage) Init() error {
 func (s *FileStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
 	for i, v := range *items {
 		si, err := s.StoreURL(v.GetStorageItem().URL)
-		if err != nil {
+		var ae *ItemAlreadyExistsError
+		if err != nil && !errors.As(err, &ae) {
 			return err
 		}
 		(*items)[i].GetStorageItem().Shorten = si.Shorten

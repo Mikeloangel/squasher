@@ -26,7 +26,7 @@ func (ds *DBStorage) StoreURL(url string) (StorageItem, error) {
 
 	si, err := ds.FetchURL(short)
 	if err == nil {
-		return si, nil
+		return si, NewItemAlreadyExistsError(nil, url)
 	}
 
 	si = StorageItem{

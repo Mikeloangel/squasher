@@ -18,7 +18,7 @@ func Init(level string) error {
 	cfg := zap.NewProductionConfig()
 	cfg.Level = lvl
 
-	procuctionLogger, err := cfg.Build()
+	procuctionLogger, err := cfg.Build(zap.AddCaller(), zap.AddCallerSkip(1))
 	if err != nil {
 		return err
 	}
