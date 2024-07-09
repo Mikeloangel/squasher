@@ -62,8 +62,8 @@ func ValidateStorageItemWithCorrelationIDRequest(req *StorageItemWithCorrelation
 		return fmt.Errorf("original_url in request is required in each row for ID:" + req.CorrelationID)
 	}
 
-	isUrl := govalidator.IsURL(req.URL)
-	if !isUrl {
+	isURL := govalidator.IsURL(req.URL)
+	if !isURL {
 		return fmt.Errorf("original_url in each row has to be valid url for ID:" + req.CorrelationID)
 	}
 	_, err = govalidator.ValidateStruct(req)
