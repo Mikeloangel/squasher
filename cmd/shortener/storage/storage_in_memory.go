@@ -4,6 +4,7 @@ package storage
 import (
 	"errors"
 
+	"github.com/Mikeloangel/squasher/internal/apperrors"
 	urlgenerator "github.com/Mikeloangel/squasher/internal/urlGenerator"
 )
 
@@ -25,7 +26,7 @@ func (s *InMemoryStorage) StoreURL(url string) (si StorageItem, err error) {
 	short := urlgenerator.HashURL(url)
 	_, ok := s.data[short]
 	if ok {
-		err = NewItemAlreadyExistsError(err, url)
+		err = apperrors.ErrItemAlreadyExists
 	} else {
 		s.data[short] = url
 	}
@@ -60,8 +61,7 @@ func (s *InMemoryStorage) Init() error {
 func (s *InMemoryStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
 	for i, v := range *items {
 		si, err := s.StoreURL(v.GetStorageItem().URL)
-		var ae *ItemAlreadyExistsError
-		if err != nil && !errors.As(err, &ae) {
+		if err != nil && apperrors.NotErrItemAlreadyExists(err) {
 			return err
 		}
 		(*items)[i].GetStorageItem().Shorten = si.Shorten

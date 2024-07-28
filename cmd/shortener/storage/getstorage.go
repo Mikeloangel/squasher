@@ -12,8 +12,8 @@ import (
 func NewStorageFactory(cfg *config.Config, db *sql.DB) Storager {
 	// if DBDSN is not empty then use db storager
 	if len(strings.TrimSpace(cfg.DBDSN)) > 0 {
-		logger.Info("Using db storage!")
-		return NewDBStorage(db)
+		logger.Info("Using postgres storage!")
+		return NewPostgresStorage(db, cfg.DBTimeout)
 	}
 
 	// not empty file storage location returns FileStorage

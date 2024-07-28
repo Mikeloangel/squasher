@@ -2,6 +2,8 @@
 package main
 
 import (
+	"time"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"net/http"
@@ -27,17 +29,23 @@ func main() {
 		"http://localhost:8080",
 		"/tmp/short-url-db.json",
 		"",
+		5*time.Second,
 	)
 
 	// Parses enviroment flags and command line flags
 	err = config.ParseEnvironment(cfg)
 	if err != nil {
+		logger.Info(cfg)
 		logger.Fatal(err)
 		return
 	}
 
 	// Get db
-	db := config.GetDB(cfg)
+	db, err := config.GetDB(cfg)
+	if err != nil {
+		logger.Fatal(err)
+		return
+	}
 	defer db.Close()
 
 	// Gets storage implementation
@@ -46,9 +54,12 @@ func main() {
 	// Inits storage
 	err = storage.Init()
 	if err != nil {
+		logger.Info(cfg)
 		logger.Fatal(err)
 		return
 	}
+
+	logger.Info("using congig:", cfg)
 
 	// Initializes application state
 	appState := state.NewState(storage, cfg, db)

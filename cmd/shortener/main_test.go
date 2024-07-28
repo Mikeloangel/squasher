@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/state"
@@ -147,6 +148,7 @@ func getHandlers() *handlers.Handler {
 		"http://localhost:8080",
 		"/tmp/short-url-db.json",
 		"",
+		5*time.Second,
 	)
 
 	storage := storage.NewInMemoryStorage()

@@ -56,6 +56,7 @@ func (m *StorageItemWithCorrelationID) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// ValidateStorageItemWithCorrelationIDRequest validates one item of StorageItemWithCorrelationID
 func ValidateStorageItemWithCorrelationIDRequest(req *StorageItemWithCorrelationID) error {
 	var err error
 	if strings.TrimSpace(req.URL) == "" {
@@ -68,4 +69,15 @@ func ValidateStorageItemWithCorrelationIDRequest(req *StorageItemWithCorrelation
 	}
 	_, err = govalidator.ValidateStruct(req)
 	return err
+}
+
+// ValidateStorageItemsWithCorrelationIDRequest validates array of StorageItemWithCorrelationID
+func ValidateStorageItemsWithCorrelationIDRequest(items *[]StorageItemWithCorrelationID) error {
+	for _, v := range *items {
+		err := ValidateStorageItemWithCorrelationIDRequest(&v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

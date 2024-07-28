@@ -7,8 +7,8 @@ import (
 	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
 )
 
-// CreateBatchUrls creates for multiple url request shorten url
-func (h *Handler) CreateBatchUrls(w http.ResponseWriter, r *http.Request) {
+// CreateBatchURLs creates for multiple url request shorten url
+func (h *Handler) CreateBatchURLs(w http.ResponseWriter, r *http.Request) {
 	// unmarshall request items
 	var storageItems []storage.StorageItemWithCorrelationID
 	if err := json.NewDecoder(r.Body).Decode(&storageItems); err != nil {
@@ -16,15 +16,16 @@ func (h *Handler) CreateBatchUrls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// validate
+	err := storage.ValidateStorageItemsWithCorrelationIDRequest(&storageItems)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	// convert to interface (why is this needed?)
 	var optionItems []storage.StorageItemOptionsInterface
 	for i := range storageItems {
-		err := storage.ValidateStorageItemWithCorrelationIDRequest(&storageItems[i])
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
 		optionItems = append(optionItems, &storageItems[i])
 	}
 

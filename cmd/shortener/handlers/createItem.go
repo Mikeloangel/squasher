@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
-	"github.com/Mikeloangel/squasher/cmd/shortener/storage"
+	"github.com/Mikeloangel/squasher/internal/apperrors"
 	"github.com/Mikeloangel/squasher/internal/models"
 )
 
@@ -35,8 +34,7 @@ func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 
 	// adds link
 	shortened, err := h.Storage.StoreURL(url)
-	var ae *storage.ItemAlreadyExistsError
-	if errors.As(err, &ae) {
+	if apperrors.IsErrItemAlreadyExists(err) {
 		status = http.StatusConflict
 	} else if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -80,8 +78,7 @@ func (h *Handler) CreateShortURLJson(w http.ResponseWriter, r *http.Request) {
 	// adds link
 	status := http.StatusCreated
 	shortened, err := h.Storage.StoreURL(url)
-	var ae *storage.ItemAlreadyExistsError
-	if errors.As(err, &ae) {
+	if apperrors.IsErrItemAlreadyExists(err) {
 		status = http.StatusConflict
 	} else if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

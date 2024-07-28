@@ -7,12 +7,12 @@ import (
 )
 
 // GetDB opens connection to db
-func GetDB(conf *Config) *sql.DB {
+func GetDB(conf *Config) (*sql.DB, error) {
 	db, err := sql.Open("pgx", conf.DBDSN)
 	if err != nil {
 		logger.Fatal(err)
-		return &sql.DB{}
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }

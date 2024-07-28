@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Mikeloangel/squasher/internal/apperrors"
 	"github.com/Mikeloangel/squasher/internal/config"
 	urlgenerator "github.com/Mikeloangel/squasher/internal/urlGenerator"
 )
@@ -32,7 +33,7 @@ func (s *FileStorage) StoreURL(url string) (StorageItem, error) {
 	// Tries to get already existed url
 	si, err := s.FetchURL(short)
 	if err == nil {
-		return si, NewItemAlreadyExistsError(nil, url)
+		return si, apperrors.ErrItemAlreadyExists
 	}
 
 	si = StorageItem{
@@ -107,8 +108,7 @@ func (s *FileStorage) Init() error {
 func (s *FileStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
 	for i, v := range *items {
 		si, err := s.StoreURL(v.GetStorageItem().URL)
-		var ae *ItemAlreadyExistsError
-		if err != nil && !errors.As(err, &ae) {
+		if err != nil && apperrors.NotErrItemAlreadyExists(err) {
 			return err
 		}
 		(*items)[i].GetStorageItem().Shorten = si.Shorten
