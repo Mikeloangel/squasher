@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
+	"github.com/Mikeloangel/squasher/cmd/shortener/middlewares"
 	"github.com/Mikeloangel/squasher/internal/logger"
 	"github.com/go-chi/chi/v5"
 )
@@ -10,7 +11,7 @@ import (
 func Router(handler *handlers.Handler) chi.Router {
 	r := chi.NewRouter()
 
-	// r.Use(middlewares.GzipMiddleware)
+	r.Use(middlewares.GzipMiddleware)
 	r.Use(logger.WithLoggerMiddleware)
 
 	registerShortURLRoutes(r, handler)
