@@ -2,6 +2,10 @@
 package main
 
 import (
+	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+
 	"net/http"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
@@ -24,27 +28,41 @@ func main() {
 		8080,
 		"http://localhost:8080",
 		"/tmp/short-url-db.json",
+		"",
+		5*time.Second,
 	)
 
 	// Parses enviroment flags and command line flags
 	err = config.ParseEnvironment(cfg)
 	if err != nil {
+		logger.Info(cfg)
 		logger.Fatal(err)
 		return
 	}
 
-	// Gets storage implementation
-	storage := storage.NewStorageFactory(cfg)
-
-	// Inits storage
-	err = storage.Init()
+	// Get db
+	db, err := config.GetDB(cfg)
 	if err != nil {
 		logger.Fatal(err)
 		return
 	}
+	defer db.Close()
+
+	// Gets storage implementation
+	storage := storage.NewStorageFactory(cfg, db)
+
+	// Inits storage
+	err = storage.Init()
+	if err != nil {
+		logger.Info(cfg)
+		logger.Fatal(err)
+		return
+	}
+
+	logger.Info("using congig:", cfg)
 
 	// Initializes application state
-	appState := state.NewState(storage, cfg)
+	appState := state.NewState(storage, cfg, db)
 
 	// Creates a new handler for application state
 	handler := handlers.NewHandler(appState)

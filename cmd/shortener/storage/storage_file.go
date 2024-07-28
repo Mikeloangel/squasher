@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Mikeloangel/squasher/internal/apperrors"
 	"github.com/Mikeloangel/squasher/internal/config"
 	urlgenerator "github.com/Mikeloangel/squasher/internal/urlGenerator"
 )
@@ -29,10 +30,10 @@ func NewFileStorage(cfg *config.Config) Storager {
 func (s *FileStorage) StoreURL(url string) (StorageItem, error) {
 	short := urlgenerator.HashURL(url)
 
-	// Tries to get already existed file
+	// Tries to get already existed url
 	si, err := s.FetchURL(short)
 	if err == nil {
-		return si, nil
+		return si, apperrors.ErrItemAlreadyExists
 	}
 
 	si = StorageItem{
@@ -100,5 +101,17 @@ func (s *FileStorage) Init() error {
 
 	s.writer = bufio.NewWriter(file)
 
+	return nil
+}
+
+// MultiStoreURL creates for slice of links with options shorten version
+func (s *FileStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
+	for i, v := range *items {
+		si, err := s.StoreURL(v.GetStorageItem().URL)
+		if err != nil && apperrors.NotErrItemAlreadyExists(err) {
+			return err
+		}
+		(*items)[i].GetStorageItem().Shorten = si.Shorten
+	}
 	return nil
 }

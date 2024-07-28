@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Mikeloangel/squasher/internal/apperrors"
 	"github.com/Mikeloangel/squasher/internal/models"
 )
 
@@ -29,16 +30,20 @@ func (h *Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	status := http.StatusCreated
+
 	// adds link
 	shortened, err := h.Storage.StoreURL(url)
-	if err != nil {
+	if apperrors.IsErrItemAlreadyExists(err) {
+		status = http.StatusConflict
+	} else if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	result := h.Conf.GetHostLocation() + shortened.Shorten
 
 	// sends response
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(status)
 	w.Write([]byte(result))
 
 }
@@ -71,8 +76,11 @@ func (h *Handler) CreateShortURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// adds link
+	status := http.StatusCreated
 	shortened, err := h.Storage.StoreURL(url)
-	if err != nil {
+	if apperrors.IsErrItemAlreadyExists(err) {
+		status = http.StatusConflict
+	} else if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -81,7 +89,7 @@ func (h *Handler) CreateShortURLJson(w http.ResponseWriter, r *http.Request) {
 	// sends response
 	response := models.CreateShortURLResponse{Result: result}
 	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(response)
 
 }

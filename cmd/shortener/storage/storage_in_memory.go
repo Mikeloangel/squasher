@@ -4,6 +4,7 @@ package storage
 import (
 	"errors"
 
+	"github.com/Mikeloangel/squasher/internal/apperrors"
 	urlgenerator "github.com/Mikeloangel/squasher/internal/urlGenerator"
 )
 
@@ -21,17 +22,19 @@ func NewInMemoryStorage() Storager {
 
 // Set stores the given URL and returns a shortened version of it.
 // If the URL is already stored, it returns the existing shortened version.
-func (s *InMemoryStorage) StoreURL(url string) (StorageItem, error) {
+func (s *InMemoryStorage) StoreURL(url string) (si StorageItem, err error) {
 	short := urlgenerator.HashURL(url)
 	_, ok := s.data[short]
-	if !ok {
+	if ok {
+		err = apperrors.ErrItemAlreadyExists
+	} else {
 		s.data[short] = url
 	}
 
 	return StorageItem{
 		URL:     url,
 		Shorten: short,
-	}, nil
+	}, err
 }
 
 // Get retrieves the original URL for the given shortened version.
@@ -51,5 +54,17 @@ func (s *InMemoryStorage) FetchURL(short string) (StorageItem, error) {
 
 // Init starts InMemoryStorage
 func (s *InMemoryStorage) Init() error {
+	return nil
+}
+
+// MultiStoreURL creates for slice of links with options shorten version
+func (s *InMemoryStorage) MultiStoreURL(items *[]StorageItemOptionsInterface) error {
+	for i, v := range *items {
+		si, err := s.StoreURL(v.GetStorageItem().URL)
+		if err != nil && apperrors.NotErrItemAlreadyExists(err) {
+			return err
+		}
+		(*items)[i].GetStorageItem().Shorten = si.Shorten
+	}
 	return nil
 }

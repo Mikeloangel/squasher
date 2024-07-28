@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Mikeloangel/squasher/cmd/shortener/handlers"
 	"github.com/Mikeloangel/squasher/cmd/shortener/state"
@@ -145,6 +147,8 @@ func getHandlers() *handlers.Handler {
 		8080,
 		"http://localhost:8080",
 		"/tmp/short-url-db.json",
+		"",
+		5*time.Second,
 	)
 
 	storage := storage.NewInMemoryStorage()
@@ -155,6 +159,6 @@ func getHandlers() *handlers.Handler {
 	}
 
 	return handlers.NewHandler(
-		state.NewState(storage, cfg),
+		state.NewState(storage, cfg, &sql.DB{}),
 	)
 }

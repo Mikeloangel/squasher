@@ -4,16 +4,22 @@ package config
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Config has all needed config fields for an app
 type Config struct {
-	ServerLocation      string
-	ServerPort          int
-	HostLocation        string
+	ServerLocation string
+	ServerPort     int
+	HostLocation   string
+
 	StorageFileLocation string
+
+	DBDSN     string
+	DBTimeout time.Duration
 }
 
 // NewConfig creates a new instance of Config
@@ -22,12 +28,16 @@ func NewConfig(
 	serverPort int,
 	hostLocation string,
 	storageFileLocation string,
+	DBDSN string,
+	DBTimeout time.Duration,
 ) *Config {
 	return &Config{
 		ServerLocation:      serverLocation,
 		ServerPort:          serverPort,
 		HostLocation:        hostLocation,
 		StorageFileLocation: storageFileLocation,
+		DBDSN:               DBDSN,
+		DBTimeout:           DBTimeout,
 	}
 }
 
@@ -61,4 +71,18 @@ func (c *Config) ParseServerConfig(s string) error {
 	}
 
 	return nil
+}
+
+func (c *Config) String() string {
+	re := regexp.MustCompile(`password=[^ ]+`)
+
+	sanitizedDBDSN := re.ReplaceAllString(c.DBDSN, "password=[REDACTED]")
+	return fmt.Sprintf(
+		"Server location: %s:%v, Host location: %s, Storage file location: %s DBDSN: %s",
+		c.ServerLocation,
+		c.ServerPort,
+		c.HostLocation,
+		c.StorageFileLocation,
+		sanitizedDBDSN,
+	)
 }
